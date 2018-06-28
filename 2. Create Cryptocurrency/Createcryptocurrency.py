@@ -133,6 +133,48 @@ def get_block():
                 'length':len(blockchain.chain)}
     return jsonify(response), 200
             
+#Validating blockchain
+@app.route('/is_valid', methods = ['GET'])
+    def isvalid():
+        if blockchain.is_chain_valid(blockchain.chain):
+            response = {'message':'Everything good going man'}
+        else:
+            response = {'message':'Hey, we got some problem here'}
+        return josnify(response), 200
+
+@app.route('/add_transaction', methods = ['POST'])
+    def add_transaction():
+        json = request.get_json()
+        transaction_keys = ['sender','reciever','amount']
+        if not all(key in json for key in transaction_keys):
+            return 'There is some problem', 400
+        index = blockchain.add_transactions(json['sender'], json['reciever'], json['amount'])
+        return f'Your transaction will be added to the block no {index}', 201
+
+@app.route('/add_nodes', methods = ['POST'])
+    def add_nodes():
+        json = request.get_json()
+        nodes = json.get('node')
+        if nodes == []:
+            return 'Something wrong', 400
+        else:
+            for node in nodes:
+                blockchain.add_node(node)
+            response = {'message':'hey, all the nodes are added',
+                        'nodes': list(blockchain.nodes)}
+            return jsonify(response), 201
+
+@app.route('/repalce_chain', methods = ['GET'])
+    def replace_chain():
+        is_valid_chain = blockchain.update_chain()
+        if is_valid_chain:
+            return {'message':'Hey your chain was invalid now it is updated',
+                    'chain':blockchain.chain}, 200
+        else:
+            return {'messsage':'Chain is up to date'
+                    'actual_chain':blockchain.chain}, 200
+
+
 #Running app
 app.run(host = '0.0.0.0', port = 5000)
 
