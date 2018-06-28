@@ -15,6 +15,7 @@ import requests
 from uuid import uuid4
 from urllib.parse import urlparse
 
+# Cryptocurrency blockchain
 class Blockchain:
    
         def create_block(self, proof, previous_hash):
@@ -22,16 +23,16 @@ class Blockchain:
             'index' : len(self.chain)+1,
             'timestamp' : str(datetime.datetime.now()),
             'proof' : proof,
-            'previous_hash' : previous_hash
-            'transaction': self.transaction
+            'previous_hash' : previous_hash,
+            'transactions': self.transactions
             }
-            self.transaction = []
+            self.transactions = []
             self.chain.append(block)
             return block
         
         def __init__(self):
             self.chain = []
-            self.transaction = []
+            self.transactions = []
             self.nodes = set()
             self.create_block(proof = 1, previous_hash = '0')
 
@@ -71,8 +72,8 @@ class Blockchain:
                 block_index+=1
             return True
             
-        def add_transaction(self, sender, reciever, amount):
-            self.transaction.append({'sender':sender,
+        def add_transactions(self, sender, reciever, amount):
+            self.transactions.append({'sender':sender,
                                      'reciever':reciever,
                                      'amount':amount})
             return(self.get_previous_block()['index']+1)
@@ -81,15 +82,37 @@ class Blockchain:
             parsed_url = urlparse(address)
             self.nodes.add(parsed_url.netloc)
             
+        def update_chain(self):
+            network = self.nodes
+            length = len(self.chain)
+            longestchain = None
+            for node in network:
+                response = requests.get(f'http://{node}/get_chain')
+                if response.status_code = 200:
+                    length = response.json()['length']
+                    chain = response.json()['chain']
+                    if length > maxlength and self.is_chain_valid(chain):
+                        maxlength = length
+                        longestchain = chain
+            if longestchain:
+                self.chain = longestchain
+                return True
+            return False
+              
             
+#Part2 Mining our Blockchain
             
 #Building app
 app = Flask(__name__)
 blockchain = Blockchain()
 
+
+node_address = str(uuid4()).replace('-','')
+
 #Mining a block
 @app.route('/mine_block', methods = ['GET'])
 def mine_block():
+    blockchain.add_transactions(sender = node_address, reciever = 'Nitin', ammount = 0.001)
     previous_block = blockchain.get_previous_block()
     previous_proof = previous_block['proof']
     proof = blockchain.proof_of_work(previous_proof)
@@ -98,6 +121,7 @@ def mine_block():
     response = {'message':'Congratulation you mined a block',
                 'block_index':block['index'],
                 'timestamp':block['timestamp'],
+                'transactions':block['transactions']
                 'proof':block['proof'],
                 'previous_hash':block['previous_hash']}
     return jsonify(response), 200 
