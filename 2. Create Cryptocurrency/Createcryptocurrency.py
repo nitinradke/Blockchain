@@ -23,12 +23,16 @@ class Blockchain:
             'timestamp' : str(datetime.datetime.now()),
             'proof' : proof,
             'previous_hash' : previous_hash
+            'transaction': self.transaction
             }
+            self.transaction = []
             self.chain.append(block)
             return block
         
         def __init__(self):
             self.chain = []
+            self.transaction = []
+            self.nodes = set()
             self.create_block(proof = 1, previous_hash = '0')
 
         def get_previous_block(self):
@@ -67,6 +71,17 @@ class Blockchain:
                 block_index+=1
             return True
             
+        def add_transaction(self, sender, reciever, amount):
+            self.transaction.append({'sender':sender,
+                                     'reciever':reciever,
+                                     'amount':amount})
+            return(self.get_previous_block()['index']+1)
+            
+        def add_node(self, address):
+            parsed_url = urlparse(address)
+            self.nodes.add(parsed_url.netloc)
+            
+            
             
 #Building app
 app = Flask(__name__)
@@ -96,3 +111,5 @@ def get_block():
             
 #Running app
 app.run(host = '0.0.0.0', port = 5000)
+
+
