@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Sat Jun 30 16:20:36 2018
+
+@author: Nitin Radke
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Thu Jun 28 10:36:07 2018
 
 @author: Nitin Radke
@@ -113,7 +120,7 @@ node_address = str(uuid4()).replace('-','')
 #Mining a block
 @app.route('/mine_block', methods = ['GET'])
 def mine_block():
-    blockchain.add_transactions(sender = node_address, reciever = 'Nitin', ammount = 0.001)
+    blockchain.add_transactions(sender = node_address, reciever = 'Hardik', amount = 0.001)
     previous_block = blockchain.get_previous_block()
     previous_proof = previous_block['proof']
     proof = blockchain.proof_of_work(previous_proof)
@@ -171,14 +178,16 @@ def add_nodes():
 def replace_chain():
     is_valid_chain = blockchain.update_chain()
     if is_valid_chain:
-        return {'message':'Hey your chain was invalid now it is updated',
-                'chain':blockchain.chain}, 200
+        response = {'message':'Hey your chain was invalid now it is updated',
+                'chain':blockchain.chain}
+        return response , 200
     else:
-        return {'messsage':'Chain is up to date',
-                'actual_chain':blockchain.chain}, 200
+        response = {'messsage':'Chain is up to date',
+                'actual_chain':blockchain.chain}
+        return response, 200
 
 
 #Running app
-app.run(host = '0.0.0.0', port = 5000)
+app.run(host = '0.0.0.0', port = 5003)
 
 
